@@ -1,5 +1,6 @@
 # Environment
-.env
+.env*
+!.env.example
 venv/
 .venv/
 
@@ -32,4 +33,3 @@ logs/*.log
 *.bak
 .DS_Store
 tmp/
-=2.14
