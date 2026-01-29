@@ -1,0 +1,13 @@
+{
+  "hosts": {
+    "biotact-miniapp": {
+      "level": "admin",
+      "description": "BioTact MiniApp — основной сервер"
+    }
+  },
+  "default_host": "biotact-miniapp",
+  "connection_timeout": 10,
+  "command_timeout": 60,
+  "max_output_lines": 150,
+  "max_output_bytes": 65536
+}

@@ -1,0 +1,52 @@
+{
+  "commands": {
+    "system": [
+      "systemctl status",
+      "systemctl restart",
+      "systemctl start",
+      "systemctl stop",
+      "systemctl is-active",
+      "journalctl -u",
+      "df -h",
+      "free -m",
+      "uptime",
+      "top -bn1",
+      "ps aux",
+      "netstat -tlnp",
+      "ss -tlnp"
+    ],
+    "docker": [
+      "docker ps",
+      "docker logs",
+      "docker restart",
+      "docker compose up",
+      "docker compose down",
+      "docker compose logs"
+    ],
+    "network": [
+      "curl -s",
+      "ping -c",
+      "dig",
+      "nslookup"
+    ],
+    "files": [
+      "cat /var/log",
+      "tail -n",
+      "ls -la",
+      "du -sh"
+    ]
+  },
+  "blocked_patterns": [
+    "rm -rf /",
+    "mkfs",
+    "dd if=",
+    "> /dev/sd",
+    "chmod -R 777",
+    "| sh",
+    "| bash",
+    "curl.*| bash",
+    "wget.*| sh",
+    "sudo su",
+    "passwd"
+  ]
+}

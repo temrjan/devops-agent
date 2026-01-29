@@ -1,0 +1,7 @@
+aiogram>=3.24
+anthropic>=0.76
+pydantic>=2.12
+pydantic-settings>=2.12
+aiosqlite>=0.22
+structlog>=25.5
+asyncssh>=2.14
