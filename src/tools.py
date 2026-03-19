@@ -116,7 +116,7 @@ class SSHExecuteTool(Tool):
         "required": ["command"],
     }
 
-    async def execute(
+    async def execute(  # type: ignore[override]
         self,
         command: str,
         host: str | None = None,
@@ -172,8 +172,9 @@ class SSHListHostsTool(Tool):
 
     name: ClassVar[str] = "ssh_list_hosts"
     description: ClassVar[str] = (
-        "List all available SSH hosts with their permission levels and descriptions. "
-        "Use this to see which servers are available and what actions are allowed on each."
+        "List all available SSH hosts with their permission "
+        "levels and descriptions. Use this to see which servers "
+        "are available and what actions are allowed on each."
     )
     parameters: ClassVar[dict[str, Any]] = {
         "type": "object",

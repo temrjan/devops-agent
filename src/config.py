@@ -57,4 +57,4 @@ class Settings(BaseSettings):
         return self.base_dir / "config" / "ssh_permissions.json"
 
 
-settings = Settings()
+settings = Settings()  # type: ignore[call-arg]

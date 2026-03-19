@@ -11,7 +11,7 @@ import asyncio
 import json
 import re
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 logger = structlog.get_logger()
 
 
-class PermissionLevel(str, Enum):
+class PermissionLevel(StrEnum):
     """Permission levels for SSH hosts."""
 
     READONLY = "readonly"
@@ -122,7 +122,8 @@ READONLY_PATTERNS: list[str] = [
     r"^ifconfig(\s+|$)",
 ]
 
-OPERATOR_PATTERNS: list[str] = READONLY_PATTERNS + [
+OPERATOR_PATTERNS: list[str] = [
+    *READONLY_PATTERNS,
     # Service management
     r"^systemctl\s+(restart|start|stop|reload)\s+",
     r"^systemctl\s+daemon-reload$",
@@ -160,7 +161,9 @@ class SSHManager:
         self._permissions_path = permissions_path
         self._security = security
         self._ssh_config_path = ssh_config_path or Path.home() / ".ssh" / "config"
-        self._known_hosts_path = known_hosts_path or Path.home() / ".ssh" / "known_hosts"
+        self._known_hosts_path = (
+            known_hosts_path or Path.home() / ".ssh" / "known_hosts"
+        )
         self._settings: SSHSettings | None = None
         self._logger = logger.bind(component="ssh_manager")
 
@@ -246,11 +249,7 @@ class SSHManager:
         )
 
         # Check if command matches any allowed pattern
-        for pattern in patterns:
-            if re.match(pattern, command):
-                return True
-
-        return False
+        return any(re.match(pattern, command) for pattern in patterns)
 
     def _truncate_output(self, output: str) -> tuple[str, bool, str | None]:
         """Truncate output if it exceeds limits.
@@ -332,8 +331,12 @@ class SSHManager:
             return SSHResult(
                 success=False,
                 output="",
-                error=f"Команда запрещена на {host} (уровень: {host_config.level.value}). "
-                f"На этом сервере разрешены только команды для уровня '{host_config.level.value}'.",
+                error=(
+                    f"Команда запрещена на {host}"
+                    f" (уровень: {host_config.level.value}). "
+                    f"На этом сервере разрешены только команды"
+                    f" для уровня '{host_config.level.value}'."
+                ),
                 exit_code=-1,
                 host=host,
             )
@@ -369,8 +372,8 @@ class SSHManager:
                     timeout=timeout,
                 )
 
-            stdout = result.stdout or ""
-            stderr = result.stderr or ""
+            stdout = str(result.stdout or "")
+            stderr = str(result.stderr or "")
             exit_code = result.exit_status or 0
 
             # Truncate output if needed
@@ -443,7 +446,7 @@ class SSHManager:
                 host=host,
             )
 
-        except asyncio.TimeoutError:
+        except TimeoutError:
             log.error("SSH command timeout", timeout=timeout)
             return SSHResult(
                 success=False,

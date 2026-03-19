@@ -278,7 +278,8 @@ class SecurityGuard:
         Args:
             user_id: User requesting command execution.
             command: Command to validate.
-            skip_allowlist: If True, skip allowlist check (for SSH per-level validation).
+            skip_allowlist: If True, skip allowlist check
+                (for SSH per-level validation).
 
         Returns:
             Tuple of (is_allowed, list_of_warnings).

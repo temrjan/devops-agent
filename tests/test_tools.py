@@ -1,12 +1,9 @@
 """Tests for SSH-based DevOps tools."""
 
-import json
-from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from src.security import SecurityGuard
 from src.ssh_manager import SSHManager, SSHResult
 from src.tools import SSHExecuteTool, SSHListHostsTool, ToolRegistry, ToolResult
 
@@ -184,7 +181,9 @@ class TestSSHListHostsTool:
 
     @pytest.mark.asyncio
     async def test_execute_success(
-        self, tool: SSHListHostsTool, mock_ssh_manager: MagicMock
+        self,
+        tool: SSHListHostsTool,
+        mock_ssh_manager: MagicMock,  # noqa: ARG002
     ) -> None:
         """Tool should return host list."""
         result = await tool.execute()

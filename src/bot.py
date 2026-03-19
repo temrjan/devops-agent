@@ -13,7 +13,12 @@ from collections import defaultdict
 from aiogram import Bot, Dispatcher, F, Router
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
-from aiogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Message
+from aiogram.types import (
+    CallbackQuery,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    Message,
+)
 
 from src.agent import DevOpsAgent
 from src.config import settings
@@ -308,7 +313,9 @@ class DevOpsBot:
         # Use agent to check health via SSH
         result = await self._agent.run(
             user_id=user_id,
-            query="Покажи состояние системы: CPU, память, диск (df -h, free -m, uptime)",
+            query=(
+                "Покажи состояние системы: CPU, память, диск (df -h, free -m, uptime)"
+            ),
             model=model_id,
         )
 
@@ -348,7 +355,10 @@ class DevOpsBot:
         # Use agent to read logs via SSH
         result = await self._agent.run(
             user_id=user_id,
-            query=f"Покажи последние 50 строк логов сервиса {service} (journalctl -u {service} -n 50)",
+            query=(
+                f"Покажи последние 50 строк логов сервиса {service}"
+                f" (journalctl -u {service} -n 50)"
+            ),
             model=model_id,
         )
 
@@ -446,10 +456,13 @@ class DevOpsBot:
 
         # Build inline keyboard
         buttons = []
-        for key, (model_id, name) in MODELS.items():
+        for key, (_model_id, name) in MODELS.items():
             marker = " ✓" if key == current_key else ""
             buttons.append(
-                InlineKeyboardButton(text=f"{name}{marker}", callback_data=f"model:{key}")
+                InlineKeyboardButton(
+                    text=f"{name}{marker}",
+                    callback_data=f"model:{key}",
+                )
             )
 
         keyboard = InlineKeyboardMarkup(inline_keyboard=[buttons])
@@ -487,18 +500,22 @@ class DevOpsBot:
 
         # Update keyboard with new selection
         buttons = []
-        for key, (model_id, name) in MODELS.items():
+        for key, (_model_id, name) in MODELS.items():
             marker = " ✓" if key == model_key else ""
             buttons.append(
-                InlineKeyboardButton(text=f"{name}{marker}", callback_data=f"model:{key}")
+                InlineKeyboardButton(
+                    text=f"{name}{marker}",
+                    callback_data=f"model:{key}",
+                )
             )
 
         keyboard = InlineKeyboardMarkup(inline_keyboard=[buttons])
 
-        await callback.message.edit_text(
-            f"<b>Выбор модели Claude</b>\n\nТекущая: {model_name}",
-            reply_markup=keyboard,
-        )
+        if callback.message and hasattr(callback.message, "edit_text"):
+            await callback.message.edit_text(
+                f"<b>Выбор модели Claude</b>\n\nТекущая: {model_name}",
+                reply_markup=keyboard,
+            )
         await callback.answer(f"Модель: {model_name}")
 
     async def _handle_message(self, message: Message) -> None:

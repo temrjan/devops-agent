@@ -356,7 +356,7 @@ class StateManager:
         await self.update_session_activity(session_id)
 
         return Message(
-            id=message_id,
+            id=message_id or 0,
             session_id=session_id,
             role=role,
             content=content,
@@ -557,7 +557,7 @@ class StateManager:
             await db.commit()
 
         return Incident(
-            id=incident_id,
+            id=incident_id or 0,
             user_id=user_id,
             timestamp=now,
             query=query,
@@ -748,12 +748,14 @@ class StateManager:
         """
         await self._ensure_initialized()
 
-        async with aiosqlite.connect(self._db_path) as db:
-            async with db.execute(
+        async with (
+            aiosqlite.connect(self._db_path) as db,
+            db.execute(
                 "SELECT model FROM user_settings WHERE user_id = ?",
                 (user_id,),
-            ) as cursor:
-                row = await cursor.fetchone()
+            ) as cursor,
+        ):
+            row = await cursor.fetchone()
 
         return row[0] if row else "sonnet"
 

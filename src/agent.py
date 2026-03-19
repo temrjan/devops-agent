@@ -14,15 +14,16 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
 from anthropic import AsyncAnthropic
-from anthropic.types import Message, ToolUseBlock
 
 from src.config import settings
-from src.security import SecurityGuard
-from src.state import StateManager
-from src.tools import ToolRegistry, ToolResult
 
 if TYPE_CHECKING:
+    from anthropic.types import Message, ToolUseBlock
+
+    from src.security import SecurityGuard
     from src.ssh_manager import SSHManager
+    from src.state import StateManager
+    from src.tools import ToolRegistry, ToolResult
 
 logger = logging.getLogger(__name__)
 
@@ -211,7 +212,10 @@ class DevOpsAgent:
 
             while iterations < self._max_iterations:
                 iterations += 1
-                logger.info(f"Agent iteration {iterations}/{self._max_iterations}, model={active_model}")
+                logger.info(
+                    f"Agent iteration {iterations}/{self._max_iterations},"
+                    f" model={active_model}"
+                )
 
                 # Call Claude API
                 response = await self._call_claude(messages, tool_schemas, active_model)
