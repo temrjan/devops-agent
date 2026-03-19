@@ -19,10 +19,21 @@ class Settings(BaseSettings):
     telegram_bot_token: SecretStr = Field(alias="TELEGRAM_BOT_TOKEN")
     allowed_user_ids: list[int] = Field(default_factory=list, alias="ALLOWED_USER_IDS")
 
+    # LLM Provider
+    llm_provider: str = Field(default="anthropic", alias="LLM_PROVIDER")
+
     # Anthropic
-    anthropic_api_key: SecretStr = Field(alias="ANTHROPIC_API_KEY")
+    anthropic_api_key: SecretStr = Field(
+        default=SecretStr(""), alias="ANTHROPIC_API_KEY"
+    )
     model: str = "claude-sonnet-4-20250514"
     max_tokens: int = 4096
+
+    # OpenRouter
+    openrouter_api_key: SecretStr = Field(
+        default=SecretStr(""), alias="OPENROUTER_API_KEY"
+    )
+    openrouter_base_url: str = "https://openrouter.ai/api/v1"
 
     # Paths
     base_dir: Path = Path(__file__).parent.parent

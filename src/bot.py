@@ -29,12 +29,28 @@ from src.tools import ToolRegistry
 
 logger = logging.getLogger(__name__)
 
-# Available Claude models
-MODELS = {
+# Available models per provider
+ANTHROPIC_MODELS = {
     "sonnet": ("claude-sonnet-4-20250514", "Sonnet 4"),
     "opus": ("claude-opus-4-20250514", "Opus 4"),
     "haiku": ("claude-3-5-haiku-20241022", "Haiku 3.5"),
 }
+
+OPENROUTER_MODELS = {
+    "sonnet": ("anthropic/claude-sonnet-4-20250514", "Sonnet 4"),
+    "opus": ("anthropic/claude-opus-4-20250514", "Opus 4"),
+    "haiku": ("anthropic/claude-3.5-haiku", "Haiku 3.5"),
+    "deepseek": ("deepseek/deepseek-chat-v3-0324", "DeepSeek V3"),
+    "gpt4o": ("openai/gpt-4o", "GPT-4o"),
+    "gemini": ("google/gemini-2.5-flash-preview", "Gemini 2.5 Flash"),
+}
+
+
+def get_models() -> dict[str, tuple[str, str]]:
+    """Get available models based on configured provider."""
+    if settings.llm_provider.lower() == "openrouter":
+        return OPENROUTER_MODELS
+    return ANTHROPIC_MODELS
 
 
 class RateLimiter:
@@ -308,7 +324,7 @@ class DevOpsBot:
 
         # Get user's selected model from database
         model_key = await self._state.get_user_model(user_id)
-        model_id = MODELS.get(model_key, MODELS["sonnet"])[0]
+        model_id = get_models().get(model_key, get_models()["sonnet"])[0]
 
         # Use agent to check health via SSH
         result = await self._agent.run(
@@ -350,7 +366,7 @@ class DevOpsBot:
 
         # Get user's selected model from database
         model_key = await self._state.get_user_model(user_id)
-        model_id = MODELS.get(model_key, MODELS["sonnet"])[0]
+        model_id = get_models().get(model_key, get_models()["sonnet"])[0]
 
         # Use agent to read logs via SSH
         result = await self._agent.run(
@@ -452,11 +468,11 @@ class DevOpsBot:
 
         user_id = message.from_user.id if message.from_user else 0
         current_key = await self._state.get_user_model(user_id)
-        current_name = MODELS.get(current_key, MODELS["sonnet"])[1]
+        current_name = get_models().get(current_key, get_models()["sonnet"])[1]
 
         # Build inline keyboard
         buttons = []
-        for key, (_model_id, name) in MODELS.items():
+        for key, (_model_id, name) in get_models().items():
             marker = " ✓" if key == current_key else ""
             buttons.append(
                 InlineKeyboardButton(
@@ -490,17 +506,17 @@ class DevOpsBot:
         # Extract model key from callback data
         model_key = callback.data.split(":")[1] if callback.data else "sonnet"
 
-        if model_key not in MODELS:
+        if model_key not in get_models():
             await callback.answer("Неизвестная модель", show_alert=True)
             return
 
         # Save user preference to database
         await self._state.set_user_model(user_id, model_key)
-        model_name = MODELS[model_key][1]
+        model_name = get_models()[model_key][1]
 
         # Update keyboard with new selection
         buttons = []
-        for key, (_model_id, name) in MODELS.items():
+        for key, (_model_id, name) in get_models().items():
             marker = " ✓" if key == model_key else ""
             buttons.append(
                 InlineKeyboardButton(
@@ -542,7 +558,7 @@ class DevOpsBot:
 
         # Get user's selected model from database
         model_key = await self._state.get_user_model(user_id)
-        model_id = MODELS.get(model_key, MODELS["sonnet"])[0]
+        model_id = get_models().get(model_key, get_models()["sonnet"])[0]
 
         # Run agent
         result = await self._agent.run(user_id=user_id, query=text, model=model_id)

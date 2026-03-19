@@ -125,15 +125,45 @@ class DevOpsAgent:
             ssh_manager: Manager for SSH connections.
             client: Optional AsyncAnthropic client for dependency injection.
         """
-        self._client = client or AsyncAnthropic(
-            api_key=settings.anthropic_api_key.get_secret_value()
-        )
+        self._client = client or self._create_client()
         self._tools = tool_registry
         self._state = state_manager
         self._security = security_guard
         self._ssh = ssh_manager
         self._max_iterations = settings.max_iterations
         self._system_prompt = self._build_system_prompt()
+
+    @staticmethod
+    def _create_client() -> AsyncAnthropic:
+        """Create LLM client based on configured provider.
+
+        Returns:
+            AsyncAnthropic client (direct or via OpenRouter).
+
+        Raises:
+            ValueError: If provider is unknown or API key is missing.
+        """
+        provider = settings.llm_provider.lower()
+
+        if provider == "openrouter":
+            api_key = settings.openrouter_api_key.get_secret_value()
+            if not api_key:
+                msg = "OPENROUTER_API_KEY is required when LLM_PROVIDER=openrouter"
+                raise ValueError(msg)
+            return AsyncAnthropic(
+                api_key=api_key,
+                base_url=settings.openrouter_base_url,
+            )
+
+        if provider == "anthropic":
+            api_key = settings.anthropic_api_key.get_secret_value()
+            if not api_key:
+                msg = "ANTHROPIC_API_KEY is required when LLM_PROVIDER=anthropic"
+                raise ValueError(msg)
+            return AsyncAnthropic(api_key=api_key)
+
+        msg = f"Unknown LLM_PROVIDER: {provider}. Use 'anthropic' or 'openrouter'."
+        raise ValueError(msg)
 
     def _build_system_prompt(self) -> str:
         """Build system prompt with SSH hosts information.
